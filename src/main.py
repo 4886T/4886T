@@ -1,40 +1,60 @@
-# ----------------------------------------------------------------------------- #
-#                                                                               #        
-#    Project:        Right Arcade Control                                       #
-#    Module:         main.py                                                    #
-#    Author:         Connor Abraham                                             #
-#    Created:        Fri Sept 5 2025                                            #
-#    Description:                                                               #
-#                                                                               #                                                                          
-#    Configuration:  V5 Clawbot (Individual Motors)                             #
-#                    Controller                                                 #
-#                    Claw Motor in Port 3                                       #
-#                    Arm Motor in Port 8                                        #
-#                    Left Motor in Port 1                                       #
-#                    Right Motor in Port 10                                     #
-#                                                                               #                                                                          
-# ----------------------------------------------------------------------------- #
-
-# Library imports
 from vex import *
+import urandom
+import math
 
 # Brain should be defined by default
 brain=Brain()
 
-# Robot configuration code
-claw_motor = Motor(Ports.PORT3, GearSetting.RATIO_18_1, False)
-arm_motor = Motor(Ports.PORT8, GearSetting.RATIO_18_1, False)
-controller_1 = Controller(PRIMARY)
-l1 = Motor(Ports.PORT1, GearSetting.RATIO_18_1, False)
-r1 = Motor(Ports.PORT10, GearSetting.RATIO_18_1, True)
-l2 = Motor(Ports.PORT2, GearSetting.RATIO_18_1, False)
-r2 = Motor(Ports.PORT11, GearSetting.RATIO_18_1, True)
 
-# Begin project code
-# Main Controller loop to set motors to controller axis postiions
+
+def play_vexcode_sound(sound_name):
+    # Helper to make playing sounds from the V5 in VEXcode easier and
+    # keeps the code cleaner by making it clear what is happening.
+    print("VEXPlaySound:" + sound_name)
+    wait(5, MSEC)
+
+# add a small delay to make sure we don't print in the middle of the REPL header
+wait(200, MSEC)
+# clear the console to make sure we don't have the REPL in the console
+print("\033[2J")
+
+def onauton_autonomous_0():
+
+    pass
+
+def ondriver_drivercontrol_0():
 while True:
-    left_motor.set_velocity((controller_1.axis2.position() + controller_1.axis1.position()), PERCENT)
-    right_motor.set_velocity((controller_1.axis2.position() - controller_1.axis1.position()), PERCENT)
+    left_motor.set_velocity((controller_1.axis3.position() + controller_1.axis4.position()), PERCENT)
+    right_motor.set_velocity((controller_1.axis3.position() - controller_1.axis4.position()), PERCENT)
     left_motor.spin(FORWARD)
     right_motor.spin(FORWARD)
     wait(5, MSEC)
+
+# create a function for handling the starting and stopping of all autonomous tasks
+def auton():
+    # Start the autonomous control tasks
+    auton_task_0 = Thread( onauton_autonomous_0 )
+    # wait for the driver control period to end
+    while( competition.is_autonomous() and competition.is_enabled() ):
+        # wait 10 milliseconds before checking again
+        wait( 10, MSEC )
+    # Stop the autonomous control tasks
+    auton_task_0.stop()
+
+def driver():
+    # Start the driver control tasks
+    driver_control_task_0 = Thread( ondriver_drivercontrol_0 )
+
+    # wait for the driver control period to end
+    while( competition.is_driver_control() and competition.is_enabled() ):
+        # wait 10 milliseconds before checking again
+        wait( 10, MSEC )
+    # Stop the driver control tasks
+    driver_control_task_0.stop()
+
+
+# register the competition functions
+competition = Competition(driver, auton)
+
+when_started1()
+
